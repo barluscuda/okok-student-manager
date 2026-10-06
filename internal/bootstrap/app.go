@@ -64,6 +64,7 @@ func requestLogger(logger *zap.Logger) echo.MiddlewareFunc {
 				zap.String("method", values.Method),
 				zap.String("uri", values.URI),
 				zap.Int("status", values.Status),
+				zap.String("ip", c.RealIP()),
 			}
 			if values.Error != nil {
 				fields = append(fields, zap.Error(values.Error))
