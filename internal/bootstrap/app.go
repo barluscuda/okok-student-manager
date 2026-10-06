@@ -5,8 +5,9 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	httpadapter "github.com/okok-student-manager/internal/adapter/http"
+	"github.com/okok-student-manager/internal/adapter/process"
 	"github.com/okok-student-manager/internal/config"
-	"github.com/okok-student-manager/internal/handler"
 	"github.com/okok-student-manager/internal/service"
 	"go.uber.org/zap"
 )
@@ -41,8 +42,9 @@ func New(cfg config.Config) (*App, error) {
 		})
 	}
 
-	healthService := service.NewHealthService()
-	healthHandler := handler.NewHealthHandler(healthService)
+	healthProbe := process.NewHealthProbe()
+	healthService := service.NewHealthService(healthProbe)
+	healthHandler := httpadapter.NewHealthHandler(healthService)
 	e.GET("/health", healthHandler.Check)
 	e.GET("/api/v1/health", healthHandler.Check)
 

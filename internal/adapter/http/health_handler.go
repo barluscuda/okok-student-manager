@@ -1,27 +1,25 @@
-package handler
+package http
 
 import (
 	"net/http"
 	"time"
 
 	"github.com/labstack/echo/v4"
-	"github.com/okok-student-manager/internal/handler/dto"
+	"github.com/okok-student-manager/internal/adapter/http/dto"
+	"github.com/okok-student-manager/internal/port"
 )
 
-type healthChecker interface {
-	Check() error
-}
-
 type HealthHandler struct {
-	service healthChecker
+	checker port.HealthChecker
 }
 
-func NewHealthHandler(service healthChecker) *HealthHandler {
-	return &HealthHandler{service: service}
+func NewHealthHandler(checker port.HealthChecker) *HealthHandler {
+	return &HealthHandler{checker: checker}
 }
 
 func (h *HealthHandler) Check(c echo.Context) error {
-	if err := h.service.Check(); err != nil {
+	status, err := h.checker.Check(c.Request().Context())
+	if err != nil {
 		return echo.NewHTTPError(http.StatusServiceUnavailable, "service is unhealthy").SetInternal(err)
 	}
 
@@ -29,7 +27,7 @@ func (h *HealthHandler) Check(c echo.Context) error {
 		Code:    "OK",
 		Message: "service is healthy",
 		Data: dto.HealthData{
-			Status:    "ok",
+			Status:    string(status),
 			Timestamp: time.Now().UTC(),
 		},
 	})

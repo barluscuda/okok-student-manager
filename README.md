@@ -1,20 +1,23 @@
 # OKOK Student Manager API
 
-Minimal Echo API organized into handler and service layers. Health checks are available at `GET /health` and `GET /api/v1/health`.
+Minimal Echo API using ports and adapters. Health checks are available at `GET /health` and `GET /api/v1/health`.
 
 ## Project structure
 
 ```text
-cmd/api/             Application entrypoint
-internal/bootstrap/  Echo setup and dependency wiring
-internal/config/     Viper configuration
-internal/handler/    HTTP handlers and response DTOs
-internal/service/    Health check logic
-docs/postman/        Postman collection
-config.yaml          Root configuration file
+cmd/api/                              Application entrypoint
+internal/adapter/http/                Echo handlers and HTTP DTOs
+internal/adapter/process/             Process health probe
+internal/bootstrap/                   HTTP setup and dependency wiring
+internal/config/                      Viper configuration
+internal/domain/                      Domain health types
+internal/port/                        Application and dependency interfaces
+internal/service/                     Use-case orchestration
+docs/postman/                         Postman collection
+config.yaml                           Root configuration file
 ```
 
-The health request flow is `handler → service`. The service performs the health check; the handler builds the HTTP response DTO and timestamp.
+The health request flow is `HTTP adapter → health service port → service → probe port → process adapter`. The HTTP adapter maps the domain result to the response DTO and adds the timestamp. Dependencies are constructed in `internal/bootstrap` and point toward the application core.
 
 ## Run
 
